@@ -2,19 +2,33 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (!currentUser) {
-      router.push('/login');
+    // Give the auth context a moment to initialize
+    const timer = setTimeout(() => {
+      if (!currentUser) {
+        router.push('/login');
+      } else {
+        setIsChecking(false);
+      }
+    }, 500);
+
+    // If user is already loaded, don't wait
+    if (currentUser) {
+      setIsChecking(false);
+      clearTimeout(timer);
     }
+
+    return () => clearTimeout(timer);
   }, [currentUser, router]);
 
-  if (!currentUser) {
+  if (isChecking || !currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

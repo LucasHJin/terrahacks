@@ -17,45 +17,62 @@ export default function Header() {
     }
   };
 
-  if (!currentUser) {
-    return null; // Don't show header on login/signup pages
-  }
-
   return (
     <header className="bg-white shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="text-xl font-bold text-gray-900">
-              TerraSnap
+              BeJacked
             </Link>
           </div>
           
           <div className="flex items-center space-x-8">
-            <Link 
-              href="/take-photo" 
-              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Take Photo
-            </Link>
-            <Link 
-              href="/feed" 
-              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Feed
-            </Link>
-            <Link 
-              href="/profile" 
-              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Profile
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-            >
-              Logout
-            </button>
+            {currentUser ? (
+              // Authenticated user navigation
+              <>
+                <Link 
+                  href="/take-photo" 
+                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Take Photo
+                </Link>
+                <Link 
+                  href="/feed" 
+                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Feed
+                </Link>
+                <Link 
+                  href="/profile" 
+                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              // Unauthenticated user navigation
+              <>
+                <Link 
+                  href="/login" 
+                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Sign In
+                </Link>
+                <Link 
+                  href="/signup" 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

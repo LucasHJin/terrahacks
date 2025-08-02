@@ -48,10 +48,10 @@ export const detectFaces = async (imageElement) => {
     console.log(`Detected ${detections.length} faces with ML model`);
     
     return detections.map(detection => ({
-      x: detection.box.x - 20, // Add padding
-      y: detection.box.y - 20,
-      width: detection.box.width + 40,
-      height: detection.box.height + 40,
+      x: detection.box.x - 40, // Increased padding from 20 to 40
+      y: detection.box.y - 40,
+      width: detection.box.width + 80, // Increased padding from 40 to 80
+      height: detection.box.height + 80,
       confidence: detection.score
     }));
   } catch (error) {
@@ -96,19 +96,25 @@ const applyMultiLayerBlur = (ctx, x, y, width, height) => {
     // Apply progressive blur (multiple passes for stronger effect)
     let blurredData = imageData;
     
-    // First pass: Heavy Gaussian blur
+    // First pass: Very Heavy Gaussian blur (increased from 15 to 25)
+    blurredData = applyGaussianBlur(blurredData, 25);
+    
+    // Second pass: Stronger pixelation effect (increased from 8 to 12)
+    blurredData = applyPixelation(blurredData, 12);
+    
+    // Third pass: Additional heavy blur (increased from 10 to 20)
+    blurredData = applyGaussianBlur(blurredData, 20);
+    
+    // Fourth pass: Extra pixelation for complete anonymization
+    blurredData = applyPixelation(blurredData, 16);
+    
+    // Fifth pass: Final smoothing blur
     blurredData = applyGaussianBlur(blurredData, 15);
-    
-    // Second pass: Additional blur with pixelation effect
-    blurredData = applyPixelation(blurredData, 8);
-    
-    // Third pass: Final blur to smooth pixelation
-    blurredData = applyGaussianBlur(blurredData, 10);
     
     // Put the heavily blurred data back
     ctx.putImageData(blurredData, x, y);
     
-    // Add additional privacy overlay
+    // Add stronger privacy overlay
     addPrivacyOverlay(ctx, x, y, width, height);
     
   } catch (error) {
@@ -228,11 +234,11 @@ const applyPixelation = (imageData, pixelSize) => {
   return imageData;
 };
 
-// Add subtle privacy overlay
+// Add stronger privacy overlay
 const addPrivacyOverlay = (ctx, x, y, width, height) => {
-  // Add a subtle dark overlay to make it even harder to see
-  ctx.globalAlpha = 0.3;
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  // Add a stronger dark overlay to make it even harder to see (increased opacity)
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
   ctx.fillRect(x, y, width, height);
   ctx.globalAlpha = 1.0;
 };
