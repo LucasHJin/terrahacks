@@ -1,13 +1,12 @@
-import Image from "next/image";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-export default function Home() {
+export default function Feed() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Welcome to TerraSnap</h1>
-          <p className="text-gray-600">Your environmental photo sharing platform.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Feed</h1>
+          <p className="text-gray-600">Photo feed will be displayed here.</p>
         </div>
       </div>
     </ProtectedRoute>

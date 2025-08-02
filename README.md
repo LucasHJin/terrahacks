@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TerraSnap
 
-## Getting Started
+An environmental photo sharing platform built with Next.js and Firebase.
 
-First, run the development server:
+## Features
 
+- User authentication with Firebase (email/password)
+- Protected routes
+- Navigation header with routing to:
+  - Take Photo page
+  - Feed page
+  - Profile page
+- Responsive design with Tailwind CSS
+
+## Setup
+
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Set up Firebase:
+   - Create a new Firebase project at https://console.firebase.google.com
+   - Enable Authentication and choose Email/Password as a sign-in method
+   - Copy your Firebase config from Project Settings
+   - Update the config in `src/lib/firebase.js`
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Run the development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Learn More
+## Firebase Configuration
 
-To learn more about Next.js, take a look at the following resources:
+Update the Firebase configuration in `src/lib/firebase.js` with your project details:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```javascript
+const firebaseConfig = {
+  apiKey: "your-api-key",
+  authDomain: "your-project.firebaseapp.com", 
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "your-app-id"
+};
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/src/app/` - Next.js app router pages
+- `/src/components/` - Reusable React components
+- `/src/contexts/` - React context providers
+- `/src/lib/` - Utility libraries and configurations
