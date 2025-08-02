@@ -1,2 +1,20 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,200;0,500;1,200&display=swap');
+
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-extralight {
+  font-weight: 200;
+}
+
+.font-extralight-italic {
+  font-weight: 200;
+  font-style: italic;
+}
+
+.font-medium {
+  font-weight: 500;
+}
 

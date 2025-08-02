@@ -163,7 +163,11 @@ export default function Feed() {
   };
 
   const PostCard = ({ post, showDate = false }) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+    <div className="rounded-xl shadow-sm overflow-hidden mb-6" style={{ 
+      backgroundColor: '#f8fbfc', 
+      border: '1px solid #ecc084',
+      fontFamily: 'Inter, sans-serif'
+    }}>
       <div className="relative aspect-[4/3]">
         <Image
           src={post.imageUrl}
@@ -174,7 +178,7 @@ export default function Feed() {
         />
       </div>
       <div className="p-4">
-        <p className="text-gray-600 text-sm">
+        <p className="font-extralight text-sm" style={{ color: '#071012', fontWeight: 200 }}>
           {showDate ? formatDate(post.timestamp) : formatTimeAgo(post.timestamp)}
         </p>
       </div>
@@ -184,49 +188,82 @@ export default function Feed() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#ffbc8a' }}></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-4xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
       {error && (
-        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="mb-6 border px-4 py-3 rounded-lg font-extralight" style={{ 
+          backgroundColor: '#ffbc8a', 
+          borderColor: '#ecc084', 
+          color: '#071012' 
+        }}>
           {error}
         </div>
       )}
 
       {/* Tab Navigation */}
-      <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+      <div className="flex mb-6 p-1 rounded-xl" style={{ backgroundColor: '#ecc084' }}>
         <button
           onClick={() => setActiveTab('my-posts')}
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
             activeTab === 'my-posts'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'shadow-sm'
+              : ''
           }`}
+          style={activeTab === 'my-posts' ? {
+            backgroundColor: '#f8fbfc',
+            color: '#071012',
+            fontWeight: 500
+          } : {
+            color: '#071012',
+            fontWeight: 200
+          }}
         >
           My Posts ({myPosts.length})
         </button>
         <button
           onClick={() => setActiveTab('today-posts')}
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
             activeTab === 'today-posts'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'shadow-sm'
+              : ''
           }`}
+          style={activeTab === 'today-posts' ? {
+            backgroundColor: '#f8fbfc',
+            color: '#071012',
+            fontWeight: 500
+          } : {
+            color: '#071012',
+            fontWeight: 200
+          }}
         >
           Today&apos;s Posts ({todayPosts.length})
         </button>
       </div>
 
       {/* Refresh Button */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-6">
         <button
           onClick={refreshPosts}
           disabled={loading}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+          className="px-6 py-3 rounded-lg font-medium disabled:opacity-50 transition-all duration-200"
+          style={{
+            backgroundColor: '#ffbc8a',
+            color: '#071012',
+            fontWeight: 500
+          }}
+          onMouseEnter={(e) => {
+            if (!e.target.disabled) {
+              e.target.style.backgroundColor = '#f0bc67';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#ffbc8a';
+          }}
         >
           {loading ? 'Refreshing...' : 'Refresh'}
         </button>
@@ -241,14 +278,14 @@ export default function Feed() {
             ))
           ) : (
             <div className="col-span-full text-center py-12">
-              <div className="text-gray-400 mb-4">
+              <div className="mb-4" style={{ color: '#ecc084' }}>
                 <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
-              <p className="text-gray-600">Start by taking your first photo!</p>
+              <h3 className="text-lg font-medium mb-2" style={{ color: '#071012', fontWeight: 500 }}>No posts yet</h3>
+              <p className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>Start by taking your first photo!</p>
             </div>
           )
         ) : (
@@ -258,13 +295,13 @@ export default function Feed() {
             ))
           ) : (
             <div className="col-span-full text-center py-12">
-              <div className="text-gray-400 mb-4">
+              <div className="mb-4" style={{ color: '#ecc084' }}>
                 <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No posts today</h3>
-              <p className="text-gray-600">No one has shared any photos today yet.</p>
+              <h3 className="text-lg font-medium mb-2" style={{ color: '#071012', fontWeight: 500 }}>No posts today</h3>
+              <p className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>No one has shared any photos today yet.</p>
             </div>
           )
         )}

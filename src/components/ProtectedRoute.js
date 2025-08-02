@@ -30,10 +30,10 @@ export default function ProtectedRoute({ children }) {
 
   if (isChecking || !currentUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f8fbfc', fontFamily: 'Inter, sans-serif' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{ borderColor: '#ffbc8a' }}></div>
+          <p className="mt-4 font-extralight" style={{ color: '#071012', fontWeight: 200 }}>Loading...</p>
         </div>
       </div>
     );

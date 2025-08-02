@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserPhotos, getUserProfile } from '@/lib/photoUtils';
 import Image from 'next/image';
+import ActivityCalendar from 'react-activity-calendar';
 
 export default function Profile() {
   const [userPhotos, setUserPhotos] = useState([]);
@@ -165,49 +166,47 @@ export default function Profile() {
     loadProfileData();
   }, [currentUser]);
 
-  const generateContributionGraph = () => {
+  const generateActivityData = () => {
+    const data = [];
     const today = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    today.setHours(0, 0, 0, 0);
     
-    // Create a map of dates to photo counts
-    const photoCountByDate = {};
+    // Start from exactly one year ago
+    const startDate = new Date(today);
+    startDate.setFullYear(today.getFullYear() - 1);
+    startDate.setDate(today.getDate() + 1); // Start day after one year ago
+    startDate.setHours(0, 0, 0, 0);
+
+    // Create photo count map by date
+    const photosByDate = {};
     userPhotos.forEach(photo => {
       const date = getPhotoDate(photo.timestamp);
-      const dateKey = date.toDateString();
-      photoCountByDate[dateKey] = (photoCountByDate[dateKey] || 0) + 1;
+      // Normalize to local date to avoid timezone issues
+      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dateKey = localDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      photosByDate[dateKey] = (photosByDate[dateKey] || 0) + 1;
     });
 
-    // Generate weeks for the past year
-    const weeks = [];
-    let currentDate = new Date(oneYearAgo);
-    
-    // Start from the first day of the week containing oneYearAgo
-    currentDate.setDate(currentDate.getDate() - currentDate.getDay());
-
+    // Generate data for each day in the past year
+    let currentDate = new Date(startDate);
     while (currentDate <= today) {
-      const week = [];
-      for (let i = 0; i < 7; i++) {
-        const dateKey = currentDate.toDateString();
-        const count = photoCountByDate[dateKey] || 0;
-        week.push({
-          date: new Date(currentDate),
-          count: count,
-          isToday: currentDate.toDateString() === today.toDateString()
-        });
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-      weeks.push(week);
+      const dateKey = currentDate.toISOString().split('T')[0];
+      const count = photosByDate[dateKey] || 0;
+      
+      data.push({
+        date: dateKey,
+        count: count,
+        level: count === 0 ? 0 : count === 1 ? 1 : count <= 2 ? 2 : count <= 4 ? 3 : 4
+      });
+
+      currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    return weeks;
-  };
+    console.log('Activity data generated:', data.length, 'days');
+    console.log('Date range:', startDate.toISOString().split('T')[0], 'to', today.toISOString().split('T')[0]);
+    console.log('Sample recent data:', data.slice(-7)); // Show last 7 days
 
-  const getContributionColor = (count) => {
-    if (count === 0) return 'bg-gray-100';
-    if (count === 1) return 'bg-green-200';
-    if (count === 2) return 'bg-green-400';
-    return 'bg-green-600';
+    return data;
   };
 
   const ProfilePicture = () => {
@@ -220,7 +219,8 @@ export default function Profile() {
             src={mostRecentPhoto.imageUrl}
             alt="Profile"
             fill
-            className="rounded-full object-cover border-4 border-white shadow-lg"
+            className="rounded-full object-cover shadow-lg"
+            style={{ border: '4px solid #f8fbfc' }}
             sizes="128px"
           />
         </div>
@@ -228,8 +228,11 @@ export default function Profile() {
     }
 
     return (
-      <div className="w-32 h-32 mx-auto bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-        <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="w-32 h-32 mx-auto rounded-full flex items-center justify-center shadow-lg" style={{ 
+        backgroundColor: '#ecc084',
+        border: '4px solid #f8fbfc'
+      }}>
+        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#071012' }}>
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       </div>
@@ -239,26 +242,28 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#ffbc8a' }}></div>
       </div>
     );
   }
 
-  const contributionWeeks = generateContributionGraph();
-
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
       {error && (
-        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="mb-6 border px-4 py-3 rounded-lg font-extralight" style={{ 
+          backgroundColor: '#ffbc8a', 
+          borderColor: '#ecc084', 
+          color: '#071012' 
+        }}>
           {error}
         </div>
       )}
 
       {/* Profile Header */}
-      <div className="bg-white rounded-lg shadow-md p-8 mb-6">
+      <div className="rounded-xl shadow-sm p-8 mb-6" style={{ backgroundColor: '#f8fbfc', border: '1px solid #ecc084' }}>
         <div className="text-center">
           <ProfilePicture />
-          <h2 className="mt-4 text-2xl font-bold text-gray-900">
+          <h2 className="mt-4 text-2xl font-medium" style={{ color: '#071012', fontWeight: 500 }}>
             {userName || 'User'}
           </h2>
         </div>
@@ -266,15 +271,15 @@ export default function Profile() {
         {/* Stats */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-indigo-600">{totalPhotos}</div>
-            <div className="text-gray-600">Total Photos</div>
+            <div className="text-3xl font-medium" style={{ color: '#ffbc8a', fontWeight: 500 }}>{totalPhotos}</div>
+            <div className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>Total Photos</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600">{streak}</div>
-            <div className="text-gray-600">Day Streak</div>
+            <div className="text-3xl font-medium" style={{ color: '#f0bc67', fontWeight: 500 }}>{streak}</div>
+            <div className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>Day Streak</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600">
+            <div className="text-3xl font-medium" style={{ color: '#ecc084', fontWeight: 500 }}>
               {userPhotos.length > 0 ? 
                 Math.round((userPhotos.filter(p => {
                   const date = getPhotoDate(p.timestamp);
@@ -282,59 +287,37 @@ export default function Profile() {
                   return daysDiff <= 365;
                 }).length / 365) * 100) : 0}%
             </div>
-            <div className="text-gray-600">Year Activity</div>
+            <div className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>Year Activity</div>
           </div>
         </div>
       </div>
 
       {/* Contribution Graph */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Photo Contribution Graph</h3>
-        <div className="flex flex-col items-center">
-          {/* Month labels */}
-          <div className="flex justify-between w-full mb-2 text-xs text-gray-500">
-            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, index) => (
-              <span key={month} className={index % 3 === 0 ? 'block' : 'hidden sm:block'}>
-                {month}
-              </span>
-            ))}
-          </div>
-
-          {/* Contribution grid */}
-          <div className="flex gap-1 overflow-x-auto w-full">
-            {contributionWeeks.map((week, weekIndex) => (
-              <div key={weekIndex} className="flex flex-col gap-1">
-                {week.map((day, dayIndex) => (
-                  <div
-                    key={`${weekIndex}-${dayIndex}`}
-                    className={`w-3 h-3 rounded-sm ${getContributionColor(day.count)} ${
-                      day.isToday ? 'ring-2 ring-indigo-500' : ''
-                    }`}
-                    title={`${day.date.toDateString()}: ${day.count} photo${day.count !== 1 ? 's' : ''}`}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center gap-2 mt-4 text-xs text-gray-500">
-            <span>Less</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 bg-gray-100 rounded-sm"></div>
-              <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
-              <div className="w-3 h-3 bg-green-400 rounded-sm"></div>
-              <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-            </div>
-            <span>More</span>
-          </div>
+      <div className="rounded-xl shadow-sm p-6" style={{ backgroundColor: '#f8fbfc', border: '1px solid #ecc084' }}>
+        <h3 className="text-lg font-medium mb-6" style={{ color: '#071012', fontWeight: 500 }}>Photo Contribution Graph</h3>
+        <div className="flex justify-center">
+          <ActivityCalendar
+            data={generateActivityData()}
+            theme={{
+              light: ['#f5f1ec', '#ecc084', '#f0bc67', '#ffbc8a', '#071012']
+            }}
+            blockSize={12}
+            blockMargin={4}
+            fontSize={12}
+            colorScheme="light"
+            maxLevel={4}
+            style={{ 
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 200
+            }}
+          />
         </div>
       </div>
 
       {/* Recent Photos Grid */}
       {userPhotos.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Photos</h3>
+        <div className="rounded-xl shadow-sm p-6 mt-6" style={{ backgroundColor: '#f8fbfc', border: '1px solid #ecc084' }}>
+          <h3 className="text-lg font-medium mb-4" style={{ color: '#071012', fontWeight: 500 }}>Recent Photos</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {userPhotos.slice(0, 12).map((photo) => (
               <div key={photo.id} className="relative aspect-square">

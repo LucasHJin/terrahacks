@@ -18,11 +18,21 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-md">
+    <header style={{ backgroundColor: '#f8fbfc', boxShadow: '0 1px 3px rgba(113, 113, 113, 0.1)' }}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-gray-900">
+            <Link 
+              href="/" 
+              className="text-xl font-medium transition-colors duration-200"
+              style={{ color: '#071012', fontWeight: 500, fontFamily: 'Inter, sans-serif' }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#f0bc67';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#071012';
+              }}
+            >
               BeJacked
             </Link>
           </div>
@@ -33,25 +43,58 @@ export default function Header() {
               <>
                 <Link 
                   href="/take-photo" 
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="px-3 py-2 rounded-md font-extralight transition-colors duration-200"
+                  style={{ color: '#071012', fontWeight: 200, fontFamily: 'Inter, sans-serif' }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = '#f0bc67';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = '#071012';
+                  }}
                 >
                   Take Photo
                 </Link>
                 <Link 
                   href="/feed" 
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="px-3 py-2 rounded-md font-extralight transition-colors duration-200"
+                  style={{ color: '#071012', fontWeight: 200, fontFamily: 'Inter, sans-serif' }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = '#f0bc67';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = '#071012';
+                  }}
                 >
                   Feed
                 </Link>
                 <Link 
                   href="/profile" 
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="px-3 py-2 rounded-md font-extralight transition-colors duration-200"
+                  style={{ color: '#071012', fontWeight: 200, fontFamily: 'Inter, sans-serif' }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = '#f0bc67';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = '#071012';
+                  }}
                 >
                   Profile
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  className="px-4 py-2 rounded-md font-medium transition-all duration-200"
+                  style={{
+                    backgroundColor: '#ecc084',
+                    color: '#071012',
+                    fontWeight: 500,
+                    fontFamily: 'Inter, sans-serif'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#f0bc67';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#ecc084';
+                  }}
                 >
                   Logout
                 </button>
@@ -61,13 +104,32 @@ export default function Header() {
               <>
                 <Link 
                   href="/login" 
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="px-3 py-2 rounded-md font-extralight transition-colors duration-200"
+                  style={{ color: '#071012', fontWeight: 200, fontFamily: 'Inter, sans-serif' }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = '#f0bc67';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = '#071012';
+                  }}
                 >
                   Sign In
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  className="px-4 py-2 rounded-md font-medium transition-all duration-200"
+                  style={{
+                    backgroundColor: '#ffbc8a',
+                    color: '#071012',
+                    fontWeight: 500,
+                    fontFamily: 'Inter, sans-serif'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#f0bc67';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#ffbc8a';
+                  }}
                 >
                   Sign Up
                 </Link>

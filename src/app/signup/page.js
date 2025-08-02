@@ -58,22 +58,26 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#f8fbfc', fontFamily: 'Inter, sans-serif' }}>
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-3xl font-medium" style={{ color: '#071012', fontWeight: 500 }}>
               Create your account
             </h2>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <div className="border px-4 py-3 rounded-lg font-extralight" style={{ 
+                backgroundColor: '#ffbc8a', 
+                borderColor: '#ecc084', 
+                color: '#071012' 
+              }}>
                 {error}
               </div>
             )}
             
-            <div className="rounded-md shadow-sm -space-y-px">
+            <div className="space-y-4">
               <div>
                 <label htmlFor="name" className="sr-only">
                   Full name
@@ -84,7 +88,20 @@ export default function Signup() {
                   type="text"
                   autoComplete="name"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full px-4 py-3 border rounded-lg font-extralight focus:outline-none focus:ring-2 focus:z-10"
+                  style={{
+                    borderColor: '#ecc084',
+                    color: '#071012',
+                    backgroundColor: '#f8fbfc',
+                    fontWeight: 200
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.ringColor = '#ffbc8a';
+                    e.target.style.borderColor = '#ffbc8a';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#ecc084';
+                  }}
                   placeholder="Full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -100,7 +117,20 @@ export default function Signup() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full px-4 py-3 border rounded-lg font-extralight focus:outline-none focus:ring-2 focus:z-10"
+                  style={{
+                    borderColor: '#ecc084',
+                    color: '#071012',
+                    backgroundColor: '#f8fbfc',
+                    fontWeight: 200
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.ringColor = '#ffbc8a';
+                    e.target.style.borderColor = '#ffbc8a';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#ecc084';
+                  }}
                   placeholder="Email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -116,7 +146,20 @@ export default function Signup() {
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full px-4 py-3 border rounded-lg font-extralight focus:outline-none focus:ring-2 focus:z-10"
+                  style={{
+                    borderColor: '#ecc084',
+                    color: '#071012',
+                    backgroundColor: '#f8fbfc',
+                    fontWeight: 200
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.ringColor = '#ffbc8a';
+                    e.target.style.borderColor = '#ffbc8a';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#ecc084';
+                  }}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -132,7 +175,20 @@ export default function Signup() {
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full px-4 py-3 border rounded-lg font-extralight focus:outline-none focus:ring-2 focus:z-10"
+                  style={{
+                    borderColor: '#ecc084',
+                    color: '#071012',
+                    backgroundColor: '#f8fbfc',
+                    fontWeight: 200
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.ringColor = '#ffbc8a';
+                    e.target.style.borderColor = '#ffbc8a';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#ecc084';
+                  }}
                   placeholder="Confirm password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -144,15 +200,36 @@ export default function Signup() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200"
+                style={{
+                  backgroundColor: '#ffbc8a',
+                  color: '#071012',
+                  fontWeight: 500
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#f0bc67';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#ffbc8a';
+                }}
               >
                 {loading ? 'Creating account...' : 'Sign up'}
               </button>
             </div>
 
-            <div className="text-sm text-center">
-              <span className="text-gray-600">Already have an account? </span>
-              <Link href="/login" className="text-indigo-600 hover:text-indigo-500">
+            <div className="text-center">
+              <span className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>Already have an account? </span>
+              <Link 
+                href="/login" 
+                className="font-medium transition-colors duration-200"
+                style={{ color: '#f0bc67', fontWeight: 500 }}
+                onMouseEnter={(e) => {
+                  e.target.style.color = '#ecc084';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = '#f0bc67';
+                }}
+              >
                 Sign in
               </Link>
             </div>
