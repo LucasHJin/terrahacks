@@ -3,6 +3,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { savePhoto, hasUserTakenPhotoToday } from '@/lib/photoUtils';
+import { initializeFaceDetection, processImageWithFaceBlur } from '@/lib/robustFaceDetection';
+import { processImageWithSimpleBlur } from '@/lib/simpleBlur';
 
 export default function Camera() {
   const videoRef = useRef(null);
@@ -14,7 +16,25 @@ export default function Camera() {
   const [facingMode, setFacingMode] = useState('environment'); // 'user' for front camera, 'environment' for back camera
   const [hasTakenPhotoToday, setHasTakenPhotoToday] = useState(false);
   const [checkingDailyLimit, setCheckingDailyLimit] = useState(true);
+  const [processingImage, setProcessingImage] = useState(false);
+  const [faceDetectionReady, setFaceDetectionReady] = useState(false);
   const { currentUser } = useAuth();
+
+  // Initialize face detection models
+  useEffect(() => {
+    const initFaceDetection = async () => {
+      console.log('Initializing face detection models...');
+      const ready = await initializeFaceDetection();
+      setFaceDetectionReady(ready);
+      if (ready) {
+        console.log('Face detection models ready!');
+      } else {
+        console.log('Face detection will use fallback methods');
+      }
+    };
+
+    initFaceDetection();
+  }, []);
 
   useEffect(() => {
     let currentStream = null;
@@ -112,6 +132,7 @@ export default function Camera() {
     if (!videoRef.current || !canvasRef.current || !currentUser) return;
 
     setIsLoading(true);
+    setProcessingImage(true);
     setError('');
     setSuccess('');
 
@@ -126,6 +147,18 @@ export default function Camera() {
 
       // Draw the video frame to canvas
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Apply enhanced face blurring with ML model
+      console.log('Processing image with enhanced face blur...');
+      const blurApplied = await processImageWithFaceBlur(canvas);
+      
+      if (!blurApplied) {
+        // Ultimate fallback
+        console.log('Applying simple privacy blur as final fallback...');
+        await processImageWithSimpleBlur(canvas);
+      }
+
+      setProcessingImage(false);
 
       // Convert canvas to blob
       const blob = await new Promise(resolve => {
@@ -151,6 +184,7 @@ export default function Camera() {
     } catch (err) {
       console.error('Error saving photo:', err);
       setError('Failed to save photo. Please try again.');
+      setProcessingImage(false);
     } finally {
       setIsLoading(false);
     }
@@ -183,13 +217,25 @@ export default function Camera() {
         </div>
       )}
 
-      <div className="relative bg-black rounded-lg overflow-hidden">
+      {!faceDetectionReady && (
+        <div className="mb-4 bg-purple-100 border border-purple-400 text-purple-700 px-4 py-3 rounded">
+          <p className="text-sm">🤖 Loading AI face detection models for enhanced privacy...</p>
+        </div>
+      )}
+
+      {processingImage && (
+        <div className="mb-4 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+          <p className="text-sm">🔒 Processing image with enhanced face blur for maximum privacy...</p>
+        </div>
+      )}
+
+      <div className="relative bg-black rounded-lg overflow-hidden aspect-[4/3] max-w-2xl mx-auto">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="w-full h-auto max-h-96 object-cover"
+          className="w-full h-full object-cover"
           onLoadedMetadata={() => {
             // Ensure video starts playing when metadata is loaded
             if (videoRef.current) {
@@ -215,15 +261,21 @@ export default function Camera() {
           {/* Capture button */}
           <button
             onClick={capturePhoto}
-            disabled={isLoading || !currentUser || hasTakenPhotoToday || checkingDailyLimit}
+            disabled={isLoading || !currentUser || hasTakenPhotoToday || checkingDailyLimit || processingImage}
             className={`p-4 rounded-full shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
               hasTakenPhotoToday 
                 ? 'bg-gray-300 text-gray-500' 
                 : 'bg-white hover:bg-gray-100 text-gray-800'
             }`}
-            title={hasTakenPhotoToday ? "Daily photo limit reached" : "Take Photo"}
+            title={
+              hasTakenPhotoToday 
+                ? "Daily photo limit reached" 
+                : processingImage 
+                  ? "Processing image..." 
+                  : "Take Photo"
+            }
           >
-            {isLoading ? (
+            {isLoading || processingImage ? (
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
             ) : (
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,6 +304,7 @@ export default function Camera() {
             <p>Point your camera at what you want to photograph and tap the capture button.</p>
             <p className="text-sm mt-2">Make sure to allow camera permissions when prompted.</p>
             <p className="text-sm mt-1 font-medium text-indigo-600">Remember: You can only take one photo per day!</p>
+            <p className="text-sm mt-1 text-green-600">✓ Privacy protection is active - faces will be automatically blurred</p>
           </div>
         )}
       </div>

@@ -164,7 +164,7 @@ export default function Feed() {
 
   const PostCard = ({ post, showDate = false }) => (
     <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-      <div className="relative aspect-square">
+      <div className="relative aspect-[4/3]">
         <Image
           src={post.imageUrl}
           alt="User post"
@@ -190,7 +190,7 @@ export default function Feed() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {error && (
         <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           {error}
