@@ -62,24 +62,11 @@ export const detectFaces = async (imageElement) => {
 
 // Fallback face detection for when models fail
 const detectFacesFallback = (imageElement) => {
-  console.log('Using fallback face detection');
+  console.log('Using fallback face detection - will not assume faces are present');
   
-  const width = imageElement.width || imageElement.videoWidth || 640;
-  const height = imageElement.height || imageElement.videoHeight || 480;
-  
-  // Simple heuristic: assume 1-2 faces in upper portion for physique photos
-  const faces = [];
-  
-  // Upper center region (most likely face location in physique photos)
-  faces.push({
-    x: width * 0.25,
-    y: height * 0.05,
-    width: width * 0.5,
-    height: height * 0.25,
-    confidence: 0.5
-  });
-  
-  return faces;
+  // Don't assume faces are present - return empty array
+  // This allows photos without faces to remain unblurred
+  return [];
 };
 
 // Enhanced blur function with stronger effect
@@ -300,12 +287,20 @@ export const processImageWithFaceBlur = async (canvas) => {
     // Detect faces
     const faces = await detectFaces(tempImg);
     
-    if (faces.length > 0) {
-      console.log(`Processing ${faces.length} detected faces with enhanced blur`);
-      applyEnhancedBlur(canvas, faces);
+    // Filter faces by confidence threshold (0.5 for ML models, 0.3 for fallback)
+    const MIN_CONFIDENCE = modelsLoaded ? 0.5 : 0.3;
+    const highConfidenceFaces = faces.filter(face => face.confidence >= MIN_CONFIDENCE);
+    
+    if (highConfidenceFaces.length > 0) {
+      console.log(`Processing ${highConfidenceFaces.length} high-confidence faces (${faces.length} total detected) with enhanced blur`);
+      applyEnhancedBlur(canvas, highConfidenceFaces);
       return true;
     } else {
-      console.log('No faces detected');
+      if (faces.length > 0) {
+        console.log(`Detected ${faces.length} faces but none with sufficient confidence (min: ${MIN_CONFIDENCE}). Skipping blur.`);
+      } else {
+        console.log('No faces detected');
+      }
       return false;
     }
   } catch (error) {
