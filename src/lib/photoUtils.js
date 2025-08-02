@@ -1,5 +1,5 @@
 import { db, storage } from '@/lib/firebase';
-import { collection, addDoc, doc, setDoc, getDocs, query, orderBy, where, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc, getDocs, query, orderBy, where, Timestamp, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // Save photo to both global and user collections
@@ -28,6 +28,23 @@ export const savePhoto = async (userId, imageBlob) => {
 
     // Save to user's personal photos collection
     await setDoc(doc(db, 'users', userId, 'photos', photoId), photoData);
+
+    // Update user's photo count (create user doc if it doesn't exist)
+    const userDocRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (userDoc.exists()) {
+      // Update existing user doc
+      const currentCount = userDoc.data().photoCount || 0;
+      await setDoc(userDocRef, { photoCount: currentCount + 1 }, { merge: true });
+    } else {
+      // Create new user doc for existing users who signed up before this feature
+      await setDoc(userDocRef, {
+        email: '', // Will be empty for legacy users
+        photoCount: 1,
+        createdAt: new Date().toISOString()
+      });
+    }
 
     return { success: true, photoId, photoData };
   } catch (error) {
@@ -112,5 +129,20 @@ export const hasUserTakenPhotoToday = async (userId) => {
   } catch (error) {
     console.error('Error checking daily photo:', error);
     return { success: false, error: error.message, hasTakenPhoto: false };
+  }
+};
+
+// Get user profile data
+export const getUserProfile = async (userId) => {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (userDoc.exists()) {
+      return { success: true, userData: userDoc.data() };
+    } else {
+      return { success: false, error: 'User not found', userData: null };
+    }
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return { success: false, error: error.message, userData: null };
   }
 };
