@@ -224,7 +224,7 @@ export default function Camera() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="max-w-2xl mx-auto p-6 mobile-reduced-padding" style={{ fontFamily: 'Inter, sans-serif' }}>
       {error && (
         <div className="mb-6 border px-4 py-3 rounded-lg font-extralight" style={{ 
           backgroundColor: '#ffbc8a', 
@@ -265,7 +265,8 @@ export default function Camera() {
         </div>
       )}
 
-      <div className="relative rounded-xl overflow-hidden aspect-[4/3] mb-6" style={{ backgroundColor: '#071012' }}>
+      <div className="relative rounded-xl overflow-hidden mb-6 camera-container" 
+           style={{ backgroundColor: '#071012' }}>
         <video
           ref={videoRef}
           autoPlay

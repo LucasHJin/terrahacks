@@ -246,11 +246,11 @@ export default function Feed() {
       </div>
 
       {/* Refresh Button */}
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end mb-6 mobile-full-width-container">
         <button
           onClick={refreshPosts}
           disabled={loading}
-          className="px-6 py-3 rounded-lg font-medium disabled:opacity-50 transition-all duration-200"
+          className="px-6 py-3 rounded-lg font-medium disabled:opacity-50 transition-all duration-200 mobile-full-width-button"
           style={{
             backgroundColor: '#ffbc8a',
             color: '#071012',

@@ -18,3 +18,39 @@
   font-weight: 500;
 }
 
+/* Camera container responsive aspect ratios */
+.camera-container {
+  aspect-ratio: 4/3; /* Default desktop aspect ratio */
+}
+
+@media (max-width: 425px) {
+  .camera-container {
+    aspect-ratio: 3/4; /* Mobile portrait aspect ratio for mirror effect */
+  }
+  
+  /* Reduce top padding on mobile for all page containers */
+  .mobile-reduced-padding {
+    padding-top: 1rem !important; /* Reduce from default padding */
+  }
+  
+  /* Specific mobile spacing adjustments */
+  .mobile-page-container {
+    padding-top: 2rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+  
+  .mobile-auth-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+  
+  /* Full width refresh button on mobile */
+  .mobile-full-width-button {
+    width: 100% !important;
+  }
+  
+  .mobile-full-width-container {
+    justify-content: stretch !important;
+  }
+}
+

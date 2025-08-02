@@ -58,7 +58,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f8fbfc', fontFamily: 'Inter, sans-serif' }}>
+    <div className="min-h-screen mobile-auth-container" style={{ backgroundColor: '#f8fbfc', fontFamily: 'Inter, sans-serif' }}>
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
