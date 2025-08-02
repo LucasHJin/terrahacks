@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { savePhoto } from '@/lib/photoUtils';
+import { savePhoto, hasUserTakenPhotoToday } from '@/lib/photoUtils';
 
 export default function Camera() {
   const videoRef = useRef(null);
@@ -12,6 +12,8 @@ export default function Camera() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [facingMode, setFacingMode] = useState('environment'); // 'user' for front camera, 'environment' for back camera
+  const [hasTakenPhotoToday, setHasTakenPhotoToday] = useState(false);
+  const [checkingDailyLimit, setCheckingDailyLimit] = useState(true);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -53,6 +55,44 @@ export default function Camera() {
       }
     };
   }, [facingMode]); // Only depend on facingMode
+
+  // Check daily photo limit
+  useEffect(() => {
+    const checkDailyLimit = async () => {
+      if (!currentUser) return;
+      
+      setCheckingDailyLimit(true);
+      try {
+        const result = await hasUserTakenPhotoToday(currentUser.uid);
+        if (result.success) {
+          setHasTakenPhotoToday(result.hasTakenPhoto);
+        }
+      } catch (err) {
+        console.error('Error checking daily limit:', err);
+      } finally {
+        setCheckingDailyLimit(false);
+      }
+    };
+
+    checkDailyLimit();
+  }, [currentUser]);
+
+  const getTimeUntilTomorrow = () => {
+    const now = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const diff = tomorrow - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m`;
+    }
+  };
 
   const stopCamera = () => {
     if (stream) {
@@ -101,6 +141,7 @@ export default function Camera() {
       
       if (result.success) {
         setSuccess('Photo saved successfully!');
+        setHasTakenPhotoToday(true); // Update daily limit status
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(''), 3000);
       } else {
@@ -126,6 +167,19 @@ export default function Camera() {
       {success && (
         <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
           {success}
+        </div>
+      )}
+
+      {hasTakenPhotoToday && (
+        <div className="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+          <p className="font-medium">Daily photo limit reached!</p>
+          <p className="text-sm">You can take another photo in {getTimeUntilTomorrow()}.</p>
+        </div>
+      )}
+
+      {checkingDailyLimit && (
+        <div className="mb-4 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+          <p className="text-sm">Checking daily photo limit...</p>
         </div>
       )}
 
@@ -161,9 +215,13 @@ export default function Camera() {
           {/* Capture button */}
           <button
             onClick={capturePhoto}
-            disabled={isLoading || !currentUser}
-            className="bg-white hover:bg-gray-100 text-gray-800 p-4 rounded-full shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Take Photo"
+            disabled={isLoading || !currentUser || hasTakenPhotoToday || checkingDailyLimit}
+            className={`p-4 rounded-full shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+              hasTakenPhotoToday 
+                ? 'bg-gray-300 text-gray-500' 
+                : 'bg-white hover:bg-gray-100 text-gray-800'
+            }`}
+            title={hasTakenPhotoToday ? "Daily photo limit reached" : "Take Photo"}
           >
             {isLoading ? (
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
@@ -184,8 +242,18 @@ export default function Camera() {
       />
 
       <div className="mt-4 text-center text-gray-600">
-        <p>Point your camera at what you want to photograph and tap the capture button.</p>
-        <p className="text-sm mt-2">Make sure to allow camera permissions when prompted.</p>
+        {hasTakenPhotoToday ? (
+          <div>
+            <p className="text-gray-500">You&apos;ve already taken your photo for today.</p>
+            <p className="text-sm mt-1">Come back tomorrow to capture another moment!</p>
+          </div>
+        ) : (
+          <div>
+            <p>Point your camera at what you want to photograph and tap the capture button.</p>
+            <p className="text-sm mt-2">Make sure to allow camera permissions when prompted.</p>
+            <p className="text-sm mt-1 font-medium text-indigo-600">Remember: You can only take one photo per day!</p>
+          </div>
+        )}
       </div>
     </div>
   );

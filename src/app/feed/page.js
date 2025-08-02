@@ -1,12 +1,13 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Feed from "@/components/Feed";
 
-export default function Feed() {
+export default function FeedPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Feed</h1>
-          <p className="text-gray-600">Photo feed will be displayed here.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">Photo Feed</h1>
+          <Feed />
         </div>
       </div>
     </ProtectedRoute>
