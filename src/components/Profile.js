@@ -213,10 +213,8 @@ export default function Profile() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Start from exactly one year ago
-    const startDate = new Date(today);
-    startDate.setFullYear(today.getFullYear() - 1);
-    startDate.setDate(today.getDate() + 1); // Start day after one year ago
+    // Start from January 1st of current year to show current year
+    const startDate = new Date(today.getFullYear(), 0, 1); // January 1st of current year
     startDate.setHours(0, 0, 0, 0);
 
     // Create photo count map by date
@@ -229,7 +227,7 @@ export default function Profile() {
       photosByDate[dateKey] = (photosByDate[dateKey] || 0) + 1;
     });
 
-    // Generate data for each day in the past year
+    // Generate data for each day from start of year to today
     let currentDate = new Date(startDate);
     while (currentDate <= today) {
       const dateKey = currentDate.toISOString().split('T')[0];

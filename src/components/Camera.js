@@ -279,36 +279,6 @@ export default function Camera() {
         </div>
       )}
 
-      {!faceDetectionReady && (
-        <div className="mb-6 border px-4 py-3 rounded-lg font-extralight" style={{ 
-          backgroundColor: '#f0bc67', 
-          borderColor: '#ecc084', 
-          color: '#071012' 
-        }}>
-          <p className="text-sm">🤖 Loading AI face detection models for enhanced privacy...</p>
-        </div>
-      )}
-
-      {isValidating && (
-        <div className="mb-6 border px-4 py-3 rounded-lg font-extralight" style={{ 
-          backgroundColor: '#f0bc67', 
-          borderColor: '#ecc084', 
-          color: '#071012' 
-        }}>
-          <p className="text-sm">🤖 Validating photo content with AI...</p>
-        </div>
-      )}
-
-      {processingImage && !isValidating && (
-        <div className="mb-6 border px-4 py-3 rounded-lg font-extralight" style={{ 
-          backgroundColor: '#ecc084', 
-          borderColor: '#f0bc67', 
-          color: '#071012' 
-        }}>
-          <p className="text-sm">🔒 Processing image with enhanced face blur for maximum privacy...</p>
-        </div>
-      )}
-
       <div className="relative rounded-xl overflow-hidden mb-6 camera-container" 
            style={{ backgroundColor: '#071012' }}>
         <video

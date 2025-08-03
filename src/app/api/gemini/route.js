@@ -39,7 +39,7 @@ The image should be REJECTED if it contains:
 
 Otherwise, the image should be APPROVED:
 - For example, fitness progress photos (including shirtless posing for bodybuilding) should be approved
-- Any type of normal selfie or physique check (provided once again it is not sexualized) should be approved
+- Any type of normal selfie or physique check (provided once again it is not sexualized) should be approved (i.e. a face is fine)
 - Flexing or showing off muscles
 
 Respond with exactly two lines:
