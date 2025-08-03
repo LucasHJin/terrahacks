@@ -41,7 +41,7 @@ export default function Header() {
                 e.target.style.color = '#071012';
               }}
             >
-              BeJacked
+              BeProud
             </Link>
           </div>
           

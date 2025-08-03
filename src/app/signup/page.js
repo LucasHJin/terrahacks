@@ -12,6 +12,8 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [consentToShare, setConsentToShare] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -25,6 +27,10 @@ export default function Signup() {
 
     if (!name.trim()) {
       return setError('Please enter your name');
+    }
+
+    if (!agreedToTerms) {
+      return setError('You must agree to the community guidelines to continue');
     }
 
     try {
@@ -44,7 +50,9 @@ export default function Signup() {
         name: name.trim(),
         email: email,
         createdAt: new Date().toISOString(),
-        photoCount: 0
+        photoCount: 0,
+        agreedToTerms: agreedToTerms,
+        consentToShare: consentToShare
       });
       
       // Add a small delay to ensure auth state is updated
@@ -193,6 +201,46 @@ export default function Signup() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
+              </div>
+            </div>
+
+            {/* Community Guidelines Checkbox */}
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <input
+                  id="agree-terms"
+                  name="agree-terms"
+                  type="checkbox"
+                  required
+                  className="h-4 w-4 rounded border mt-1"
+                  style={{
+                    accentColor: '#f0bc67',
+                    borderColor: '#ecc084'
+                  }}
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                />
+                <label htmlFor="agree-terms" className="ml-3 block text-sm font-extralight" style={{ color: '#071012', fontWeight: 200 }}>
+                  I agree to keep all photos respectful and appropriate. Images may include physique progress (e.g. shirtless posing), but must not be sexually suggestive or violate community standards. <span style={{ color: '#f0bc67' }}>*</span>
+                </label>
+              </div>
+
+              <div className="flex items-start">
+                <input
+                  id="consent-share"
+                  name="consent-share"
+                  type="checkbox"
+                  className="h-4 w-4 rounded border mt-1"
+                  style={{
+                    accentColor: '#f0bc67',
+                    borderColor: '#ecc084'
+                  }}
+                  checked={consentToShare}
+                  onChange={(e) => setConsentToShare(e.target.checked)}
+                />
+                <label htmlFor="consent-share" className="ml-3 block text-sm font-extralight" style={{ color: '#071012', fontWeight: 200 }}>
+                  I consent to having my photos shared with the community to support and promote body positivity. I understand this setting can be changed anytime in my profile.
+                </label>
               </div>
             </div>
 

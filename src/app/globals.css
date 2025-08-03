@@ -23,7 +23,7 @@
   aspect-ratio: 4/3; /* Default desktop aspect ratio */
 }
 
-@media (max-width: 425px) {
+@media (max-width: 450px) {
   .camera-container {
     aspect-ratio: 3/4; /* Mobile portrait aspect ratio for mirror effect */
   }
@@ -35,7 +35,7 @@
   
   /* Specific mobile spacing adjustments */
   .mobile-page-container {
-    padding-top: 2rem !important;
+    padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
   }
   
@@ -51,6 +51,91 @@
   
   .mobile-full-width-container {
     justify-content: stretch !important;
+  }
+  
+  /* Horizontal scrolling feed for mobile */
+  .mobile-horizontal-feed {
+    display: block !important;
+  }
+  
+  /* iPhone-style gallery main image */
+  .mobile-gallery-main {
+    width: 100% !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-behavior: smooth !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .mobile-gallery-main::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  .mobile-gallery-item {
+    flex: 0 0 100% !important;
+    scroll-snap-align: center !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+  
+  /* iPhone-style thumbnail strip */
+  .mobile-thumbnail-strip {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 0 0.5rem 1rem !important;
+    scroll-behavior: smooth !important;
+    -webkit-overflow-scrolling: touch !important;
+    background: rgba(248, 251, 252, 0.9) !important;
+    border-radius: 8px !important;
+    backdrop-filter: blur(10px) !important;
+  }
+  
+  .mobile-thumbnail-strip::-webkit-scrollbar {
+    height: 2px;
+  }
+  
+  .mobile-thumbnail-strip::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .mobile-thumbnail-strip::-webkit-scrollbar-thumb {
+    background: #ecc084;
+    border-radius: 1px;
+  }
+  
+  .mobile-thumbnail {
+    flex: 0 0 60px !important;
+    height: 60px !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    border: 2px solid transparent !important;
+  }
+  
+  .mobile-thumbnail.active {
+    border-color: #f0bc67 !important;
+    transform: scale(1.1) !important;
+  }
+  
+  .mobile-thumbnail img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  
+  .mobile-feed-item {
+    width: 90% !important;
+    max-width: 350px !important;
+  }
+  
+  /* Contribution graph auto-scroll to right */
+  .contribution-graph-container {
+    overflow-x: auto !important;
+    scroll-behavior: smooth !important;
   }
 }
 

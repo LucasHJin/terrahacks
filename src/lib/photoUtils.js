@@ -146,3 +146,51 @@ export const getUserProfile = async (userId) => {
     return { success: false, error: error.message, userData: null };
   }
 };
+
+// Get photos from users who have consented to sharing
+export const getPhotosWithConsent = async () => {
+  try {
+    // First get all photos
+    const photosRef = collection(db, 'photos');
+    const q = query(photosRef, orderBy('timestamp', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    const allPhotos = [];
+    querySnapshot.forEach((doc) => {
+      allPhotos.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Then filter by checking each user's consent
+    const photosWithConsent = [];
+    const userConsentCache = new Map(); // Cache to avoid duplicate user lookups
+
+    for (const photo of allPhotos) {
+      if (!photo.userId) continue;
+
+      // Check cache first
+      let hasConsent = userConsentCache.get(photo.userId);
+      
+      if (hasConsent === undefined) {
+        // Fetch user consent from database
+        try {
+          const userDoc = await getDoc(doc(db, 'users', photo.userId));
+          hasConsent = userDoc.exists() ? (userDoc.data().consentToShare === true) : false;
+          userConsentCache.set(photo.userId, hasConsent);
+        } catch (error) {
+          console.error('Error checking user consent for userId:', photo.userId, error);
+          hasConsent = false;
+          userConsentCache.set(photo.userId, false);
+        }
+      }
+
+      if (hasConsent) {
+        photosWithConsent.push(photo);
+      }
+    }
+    
+    return { success: true, photos: photosWithConsent };
+  } catch (error) {
+    console.error('Error getting photos with consent:', error);
+    return { success: false, error: error.message, photos: [] };
+  }
+};

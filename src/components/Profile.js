@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserPhotos, getUserProfile } from '@/lib/photoUtils';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import Image from 'next/image';
 import ActivityCalendar from 'react-activity-calendar';
 
@@ -13,6 +15,8 @@ export default function Profile() {
   const [streak, setStreak] = useState(0);
   const [totalPhotos, setTotalPhotos] = useState(0);
   const [userName, setUserName] = useState('');
+  const [consentToShare, setConsentToShare] = useState(false);
+  const [savingConsent, setSavingConsent] = useState(false);
   const { currentUser } = useAuth();
 
   const calculateStreak = (photos) => {
@@ -93,6 +97,8 @@ export default function Profile() {
             currentUser.email?.split('@')[0] || 
             'User'
           );
+          // Load consent settings
+          setConsentToShare(profileResult.userData.consentToShare || false);
         } else {
           // Fallback to display name or email username
           setUserName(
@@ -165,6 +171,42 @@ export default function Profile() {
 
     loadProfileData();
   }, [currentUser]);
+
+  const updateConsentSettings = async (newConsentValue) => {
+    if (!currentUser) return;
+
+    setSavingConsent(true);
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        consentToShare: newConsentValue
+      });
+      setConsentToShare(newConsentValue);
+    } catch (error) {
+      console.error('Error updating consent settings:', error);
+      // Revert the checkbox state if update failed
+      setConsentToShare(!newConsentValue);
+    } finally {
+      setSavingConsent(false);
+    }
+  };
+
+  // Scroll contribution graph to the right after it loads
+  useEffect(() => {
+    const scrollToRight = () => {
+      const graphContainer = document.querySelector('.contribution-graph-container');
+      if (graphContainer) {
+        // Wait a bit for the ActivityCalendar to fully render
+        setTimeout(() => {
+          graphContainer.scrollLeft = graphContainer.scrollWidth - graphContainer.clientWidth;
+        }, 100);
+      }
+    };
+
+    // Add a delay to ensure the component is fully mounted
+    const timer = setTimeout(scrollToRight, 500);
+    return () => clearTimeout(timer);
+  }, [userPhotos]); // Re-run when photos change (which affects the graph)
 
   const generateActivityData = () => {
     const data = [];
@@ -292,10 +334,41 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Privacy Settings */}
+      <div className="rounded-xl shadow-sm p-6 mb-6" style={{ backgroundColor: '#f8fbfc', border: '1px solid #ecc084' }}>
+        <h3 className="text-lg font-medium mb-4" style={{ color: '#071012', fontWeight: 500 }}>Privacy Settings</h3>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h4 className="font-medium" style={{ color: '#071012', fontWeight: 500 }}>Photo Sharing</h4>
+              <p className="text-sm font-extralight mt-1" style={{ color: '#071012', fontWeight: 200 }}>
+                Allow your photos to be shared with the community to support and promote body positivity
+              </p>
+            </div>
+            <div className="flex items-center ml-4">
+              {savingConsent && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 mr-2" style={{ borderColor: '#f0bc67' }}></div>
+              )}
+              <input
+                type="checkbox"
+                checked={consentToShare}
+                onChange={(e) => updateConsentSettings(e.target.checked)}
+                disabled={savingConsent}
+                className="h-4 w-4 rounded border"
+                style={{
+                  accentColor: '#f0bc67',
+                  borderColor: '#ecc084'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Contribution Graph */}
       <div className="rounded-xl shadow-sm p-6" style={{ backgroundColor: '#f8fbfc', border: '1px solid #ecc084' }}>
         <h3 className="text-lg font-medium mb-6" style={{ color: '#071012', fontWeight: 500 }}>Photo Contribution Graph</h3>
-        <div className="flex justify-center">
+        <div className="flex justify-center contribution-graph-container">
           <ActivityCalendar
             data={generateActivityData()}
             theme={{

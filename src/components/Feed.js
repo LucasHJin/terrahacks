@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAllPhotos, getUserPhotos } from '@/lib/photoUtils';
+import { getPhotosWithConsent, getUserPhotos } from '@/lib/photoUtils';
 import Image from 'next/image';
 
 export default function Feed() {
@@ -11,6 +11,7 @@ export default function Feed() {
   const [todayPosts, setTodayPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -27,8 +28,8 @@ export default function Feed() {
           setMyPosts(userResult.photos);
         }
 
-        // Load all posts and filter for today
-        const allResult = await getAllPhotos();
+        // Load all posts and filter for today (only from users who consented)
+        const allResult = await getPhotosWithConsent();
         if (allResult.success) {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
@@ -63,6 +64,48 @@ export default function Feed() {
 
     loadPosts();
   }, [currentUser]);
+
+  // Reset selected image when switching tabs
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [activeTab]);
+
+  const currentPosts = activeTab === 'my-posts' ? myPosts : todayPosts;
+
+  const handleThumbnailClick = (index) => {
+    setSelectedImageIndex(index);
+    // Scroll main gallery to selected image
+    const mainGallery = document.querySelector('.mobile-gallery-main');
+    if (mainGallery) {
+      const scrollPosition = index * mainGallery.offsetWidth;
+      mainGallery.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // Handle main gallery scroll to update selected thumbnail
+  useEffect(() => {
+    const handleScroll = () => {
+      const mainGallery = document.querySelector('.mobile-gallery-main');
+      if (mainGallery && currentPosts.length > 0) {
+        const scrollLeft = mainGallery.scrollLeft;
+        const itemWidth = mainGallery.offsetWidth;
+        const newIndex = Math.round(scrollLeft / itemWidth);
+        
+        if (newIndex !== selectedImageIndex && newIndex >= 0 && newIndex < currentPosts.length) {
+          setSelectedImageIndex(newIndex);
+        }
+      }
+    };
+
+    const mainGallery = document.querySelector('.mobile-gallery-main');
+    if (mainGallery) {
+      mainGallery.addEventListener('scroll', handleScroll);
+      return () => mainGallery.removeEventListener('scroll', handleScroll);
+    }
+  }, [currentPosts.length, selectedImageIndex]);
 
   const refreshPosts = async () => {
     if (!currentUser) return;
@@ -100,7 +143,15 @@ export default function Feed() {
             return false; // Skip photos without valid timestamps
           }
           return photoDate >= today && photoDate < tomorrow && photo.userId !== currentUser.uid;
-        });
+        })
+        .sort((a, b) => {
+          // Sort by timestamp descending (most recent first)
+          const aTime = a.timestamp?.seconds || new Date(a.timestamp).getTime() / 1000;
+          const bTime = b.timestamp?.seconds || new Date(b.timestamp).getTime() / 1000;
+          return bTime - aTime;
+        })
+        .slice(0, 6); // Only keep the 6 most recent photos
+        
         setTodayPosts(todayPhotos);
       }
     } catch (err) {
@@ -270,41 +321,107 @@ export default function Feed() {
       </div>
 
       {/* Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activeTab === 'my-posts' ? (
-          myPosts.length > 0 ? (
-            myPosts.map((post) => (
-              <PostCard key={post.id} post={post} showDate={true} />
-            ))
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mobile-horizontal-feed">
+        {/* Mobile Gallery View */}
+        <div className="block sm:hidden">
+          {currentPosts.length > 0 ? (
+            <>
+              {/* Main Image Display */}
+              <div className="mobile-gallery-main">
+                {currentPosts.map((post, index) => (
+                  <div key={post.id} className="mobile-gallery-item">
+                    <div className="mobile-feed-item">
+                      <PostCard post={post} showDate={activeTab === 'my-posts'} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Thumbnail Strip */}
+              {currentPosts.length > 1 && (
+                <div className="mobile-thumbnail-strip">
+                  {currentPosts.map((post, index) => (
+                    <div
+                      key={`thumb-${post.id}`}
+                      className={`mobile-thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
+                      onClick={() => handleThumbnailClick(index)}
+                    >
+                      <Image
+                        src={post.imageUrl}
+                        alt={`Photo ${index + 1}`}
+                        width={60}
+                        height={60}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
-            <div className="col-span-full text-center py-12">
+            <div className="text-center py-12">
               <div className="mb-4" style={{ color: '#ecc084' }}>
                 <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  {activeTab === 'my-posts' ? (
+                    <>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </>
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  )}
                 </svg>
               </div>
-              <h3 className="text-lg font-medium mb-2" style={{ color: '#071012', fontWeight: 500 }}>No posts yet</h3>
-              <p className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>Start by taking your first photo!</p>
+              <h3 className="text-lg font-medium mb-2" style={{ color: '#071012', fontWeight: 500 }}>
+                {activeTab === 'my-posts' ? 'No posts yet' : 'No posts today'}
+              </h3>
+              <p className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>
+                {activeTab === 'my-posts' 
+                  ? 'Start by taking your first photo!' 
+                  : 'No one has shared any photos today yet.'
+                }
+              </p>
             </div>
-          )
-        ) : (
-          todayPosts.length > 0 ? (
-            todayPosts.map((post) => (
-              <PostCard key={post.id} post={post} showDate={false} />
-            ))
+          )}
+        </div>
+
+        {/* Desktop Grid View */}
+        <div className="hidden sm:contents">
+          {activeTab === 'my-posts' ? (
+            myPosts.length > 0 ? (
+              myPosts.map((post) => (
+                <PostCard key={post.id} post={post} showDate={true} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <div className="mb-4" style={{ color: '#ecc084' }}>
+                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium mb-2" style={{ color: '#071012', fontWeight: 500 }}>No posts yet</h3>
+                <p className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>Start by taking your first photo!</p>
+              </div>
+            )
           ) : (
-            <div className="col-span-full text-center py-12">
-              <div className="mb-4" style={{ color: '#ecc084' }}>
-                <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            todayPosts.length > 0 ? (
+              todayPosts.map((post) => (
+                <PostCard key={post.id} post={post} showDate={false} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <div className="mb-4" style={{ color: '#ecc084' }}>
+                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium mb-2" style={{ color: '#071012', fontWeight: 500 }}>No posts today</h3>
+                <p className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>No one has shared any photos today yet.</p>
               </div>
-              <h3 className="text-lg font-medium mb-2" style={{ color: '#071012', fontWeight: 500 }}>No posts today</h3>
-              <p className="font-extralight" style={{ color: '#071012', fontWeight: 200 }}>No one has shared any photos today yet.</p>
-            </div>
-          )
-        )}
+            )
+          )}
+        </div>
       </div>
     </div>
   );
