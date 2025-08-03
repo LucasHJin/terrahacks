@@ -20,6 +20,7 @@ export default function Camera() {
   const [faceDetectionReady, setFaceDetectionReady] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [isCountingDown, setIsCountingDown] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const { currentUser } = useAuth();
 
   // Initialize face detection models
@@ -200,6 +201,39 @@ export default function Camera() {
         throw new Error('Failed to capture image');
       }
 
+      // Validate photo with Gemini AI before saving
+      console.log('Validating photo with AI...');
+      setIsValidating(true);
+      
+      // Convert blob to base64 for API
+      const reader = new FileReader();
+      const base64Data = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      // Call validation API
+      const validationResponse = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageData: base64Data
+        })
+      });
+
+      const validationResult = await validationResponse.json();
+      setIsValidating(false);
+
+      if (!validationResult.isValid) {
+        alert(validationResult.message);
+        return;
+    }
+
+      console.log('Photo validation passed:', validationResult.message);
+
       // Save photo using utility function
       const result = await savePhoto(currentUser.uid, blob);
       
@@ -255,7 +289,17 @@ export default function Camera() {
         </div>
       )}
 
-      {processingImage && (
+      {isValidating && (
+        <div className="mb-6 border px-4 py-3 rounded-lg font-extralight" style={{ 
+          backgroundColor: '#f0bc67', 
+          borderColor: '#ecc084', 
+          color: '#071012' 
+        }}>
+          <p className="text-sm">🤖 Validating photo content with AI...</p>
+        </div>
+      )}
+
+      {processingImage && !isValidating && (
         <div className="mb-6 border px-4 py-3 rounded-lg font-extralight" style={{ 
           backgroundColor: '#ecc084', 
           borderColor: '#f0bc67', 
@@ -323,7 +367,7 @@ export default function Camera() {
           {/* Capture button */}
           <button
             onClick={startCountdownAndCapture}
-            disabled={isLoading || !currentUser || processingImage || isCountingDown}
+            disabled={isLoading || !currentUser || processingImage || isCountingDown || isValidating}
             className="p-4 rounded-full shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               backgroundColor: '#ffbc8a',
@@ -338,14 +382,16 @@ export default function Camera() {
               e.target.style.backgroundColor = '#ffbc8a';
             }}
             title={
-              processingImage 
+              isValidating
+                ? "Validating photo..."
+                : processingImage 
                 ? "Processing image..." 
                 : isCountingDown
                   ? `Taking photo in ${countdown}...`
                   : "Take Photo"
             }
           >
-            {isLoading || processingImage ? (
+            {isLoading || processingImage || isValidating ? (
               <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#071012' }}></div>
             ) : isCountingDown ? (
               <span className="text-xl font-medium" style={{ fontWeight: 500 }}>{countdown}</span>
@@ -373,8 +419,8 @@ export default function Camera() {
           <p className="text-sm font-extralight mb-1" style={{ color: '#071012', fontWeight: 200 }}>
             Make sure to allow camera permissions when prompted.
           </p>
-          <p className="text-sm font-medium" style={{ color: '#f0bc67', fontWeight: 500 }}>
-            ✓ Privacy protection is active - faces will be automatically blurred
+          <p className="text-sm font-medium mb-1" style={{ color: '#f0bc67', fontWeight: 500 }}>
+            Privacy protection is active - faces will be automatically blurred + AI validation ensures photos meet community guidelines
           </p>
         </div>
       </div>
