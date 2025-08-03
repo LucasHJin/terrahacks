@@ -137,5 +137,11 @@
     overflow-x: auto !important;
     scroll-behavior: smooth !important;
   }
+  
+  /* Landing page text positioning for mobile */
+  .mobile-landing-container {
+    align-items: flex-start !important;
+    padding-top: 25vh !important;
+  }
 }
 
