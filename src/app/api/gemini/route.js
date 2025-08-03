@@ -35,6 +35,7 @@ The image should be REJECTED if it contains:
 - Nudity beyond what's normal for fitness progress photos (i.e. near the groinal area or breasts for women)
 - Inappropriate or sexualized content
 - Images where non-human related content is the main focus (i.e. a pet, landscape, etc.)
+- Thirsttrap like behavior or nude poses that are not fitness related (if the pose is not fitness related but they are just wearing clothes and standing there, it is fine and should be approved)
 
 Otherwise, the image should be APPROVED:
 - For example, fitness progress photos (including shirtless posing for bodybuilding) should be approved
